@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Guitarophone</string>
+    <string name="title_activity_main">Guitarophone</string>
+    <string name="package_name">li.masi.guitarophone</string>
+    <string name="custom_url_scheme">li.masi.guitarophone</string>
+</resources>

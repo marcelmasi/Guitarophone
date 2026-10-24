@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#140d08" />
+    <title>Guitarophone</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <canvas id="guitar"></canvas>
+    <!-- Only used to read the safe area sizes of the screen. -->
+    <div id="safe-area-probe"></div>
+
+    <button id="settings-button" class="round-button" aria-label="Settings">⚙︎</button>
+
+    <div id="settings" class="overlay" hidden>
+      <div class="panel">
+        <h2>Settings</h2>
+        <div class="setting">
+          <span>Amp tone</span>
+          <div class="segmented" id="tone-choice">
+            <button data-tone="clean">Clean</button>
+            <button data-tone="crunch">Crunch</button>
+            <button data-tone="lead">Lead</button>
+          </div>
+        </div>
+        <label class="setting">
+          <span>Strum on the right, neck on the left</span>
+          <input type="checkbox" id="mirrored-choice" />
+        </label>
+        <label class="setting">
+          <span>Show note names</span>
+          <input type="checkbox" id="note-names-choice" />
+        </label>
+        <button id="settings-close" class="primary">Done</button>
+      </div>
+    </div>
+
+    <div id="start" class="overlay">
+      <div class="panel">
+        <h1>Guitarophone</h1>
+        <p>
+          Hold the phone sideways in front of you, like a guitar.<br />
+          <b>Strum</b> across the strings on the body with one finger.<br />
+          <b>Hold</b> strings at the frets on the neck with your other hand.
+        </p>
+        <button id="start-button" class="primary">Play</button>
+      </div>
+    </div>
+
+    <div id="rotate-hint" class="overlay">
+      <div class="panel"><p>Turn your phone sideways to play.</p></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
