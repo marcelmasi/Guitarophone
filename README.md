@@ -1,5 +1,7 @@
 # Guitarophone
 
+![Guitarophone holding an E minor chord: fingers on fret 2 of the A and D strings](docs/screenshot.jpg)
+
 Turns your phone into an electric guitar, for iOS and Android.
 
 Hold the phone sideways in front of your chest, like a guitar, with the screen facing outwards like the top of a guitar:
