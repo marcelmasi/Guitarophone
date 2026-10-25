@@ -1,27 +1,8 @@
 import guitarProcessorUrl from './guitar-processor.ts?worker&url';
 import { GUITAR_PROCESSOR_NAME, type GuitarMessage } from './messages';
+import { TONES, type Tone } from './tones';
 
-export type Tone = 'clean' | 'crunch' | 'lead';
-
-/** Amplifier settings of a tone. */
-interface ToneSettings {
-  /** How hard the signal is driven into distortion. 1 is almost clean. */
-  drive: number;
-  /** Highest frequency in hertz the speaker cabinet lets through. */
-  cabinetCutoff: number;
-  /** Volume after the distortion, to keep all tones about equally loud. */
-  outputVolume: number;
-  /** Share of the signal that goes to the reverb. */
-  reverbAmount: number;
-}
-
-const TONES: Record<Tone, ToneSettings> = {
-  clean: { drive: 0.8, cabinetCutoff: 8000, outputVolume: 1.4, reverbAmount: 0.25 },
-  crunch: { drive: 5, cabinetCutoff: 4800, outputVolume: 0.45, reverbAmount: 0.18 },
-  lead: { drive: 22, cabinetCutoff: 4000, outputVolume: 0.32, reverbAmount: 0.22 },
-};
-
-/** Largest drive value the distortion curve is built for. Stronger signals are clipped hard. */
+/** The distortion curve covers amplified signals from -DISTORTION_RANGE to DISTORTION_RANGE. Beyond that it stays flat. */
 const DISTORTION_RANGE = 4;
 
 /**
@@ -137,7 +118,7 @@ export class GuitarAudioEngine {
   }
 }
 
-/** Soft clipping like an overdriven tube amplifier: y = tanh(DISTORTION_RANGE * x). */
+/** Soft clipping like an overdriven tube amplifier: tanh of the amplified signal. */
 function distortionCurve(): Float32Array<ArrayBuffer> {
   const length = 4096;
   const curve = new Float32Array(length);

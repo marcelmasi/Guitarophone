@@ -1,9 +1,7 @@
 import { OPEN_STRING_NOTES, STRING_COUNT, noteFrequency } from '../guitar';
 import { GUITAR_PROCESSOR_NAME, type GuitarMessage } from './messages';
 import { StringVoice } from './string-voice';
-
-/** Volume of each string in the mix, so that six strings together do not get too loud. */
-const STRING_VOLUME = 0.3;
+import { STRING_VOLUME } from './tones';
 
 /** A pluck waiting for its start time. */
 interface PendingPluck {

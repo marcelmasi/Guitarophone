@@ -1,4 +1,5 @@
-import { GuitarAudioEngine, type Tone } from './audio/engine';
+import { GuitarAudioEngine } from './audio/engine';
+import type { Tone } from './audio/tones';
 import { STRING_COUNT, fretChangeEffect, stringFrequency } from './guitar';
 import { GuitarInput, attachPointerEvents } from './input';
 import { Layout, type SafeArea } from './layout';

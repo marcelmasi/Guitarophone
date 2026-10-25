@@ -30,6 +30,7 @@ The app is a web app (TypeScript, no framework) packaged as a native app with [C
 | `src/audio/string-voice.ts` | One string, simulated with the Karplus-Strong method |
 | `src/audio/guitar-processor.ts` | Audio worklet that mixes the six strings |
 | `src/audio/engine.ts` | Amplifier: distortion, speaker cabinet filter, reverb |
+| `src/audio/tones.ts` | Settings of the amp tones (Clean, Crunch, Lead) |
 | `src/render.ts` | Draws the guitar on a canvas |
 | `src/main.ts` | Connects everything, settings and start screen |
 
