@@ -1,9 +1,6 @@
 /** Number of strings on the guitar. */
 export const STRING_COUNT = 6;
 
-/** Number of frets (bars) shown on the neck. */
-export const FRET_COUNT = 5;
-
 /**
  * MIDI note numbers of the open strings in standard tuning (E2 A2 D3 G3 B3 E4).
  * Index 0 is the thickest string (low E), index 5 the thinnest (high E).

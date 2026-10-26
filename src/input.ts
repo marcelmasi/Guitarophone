@@ -137,8 +137,8 @@ export class GuitarInput {
 
   private placeFretTouch(touch: FretTouch, layout: Layout): void {
     touch.stringIndex = layout.stringAt(touch.screenY);
-    // A fretting finger that slides into the strum zone no longer holds a fret.
-    touch.fret = layout.fretAt(layout.alongFromScreenX(touch.screenX)) ?? 0;
+    // A fretting finger in the strum zone or in the border above the neck holds no fret.
+    touch.fret = layout.isAboveNeck(touch.screenY) ? 0 : (layout.fretAt(layout.alongFromScreenX(touch.screenX)) ?? 0);
   }
 
   /** Each string sounds at the highest fret any finger holds it at, like on a real guitar. */

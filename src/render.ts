@@ -1,11 +1,13 @@
-import { FRET_COUNT, STRING_COUNT, noteName, stringNote } from './guitar';
+import { STRING_COUNT, noteName, stringNote } from './guitar';
 import type { GuitarInput } from './input';
 import { type Layout, NUT_WIDTH } from './layout';
 
 /** Thickness of each string in CSS pixels, from low E to high E. */
 const STRING_THICKNESS = [3.4, 2.8, 2.3, 1.8, 1.3, 1.0];
-/** Frets that get a dot on the fretboard. */
-const INLAY_FRETS = [3, 5];
+/** Frets that get one dot on the fretboard. */
+const SINGLE_INLAY_FRETS = [3, 5, 7, 9];
+/** Frets that get two dots on the fretboard. */
+const DOUBLE_INLAY_FRETS = [12];
 /** Time in seconds for the drawn vibration of a ringing string to fade to about a third. */
 const RINGING_FADE_TIME = 1.2;
 const MUTED_FADE_TIME = 0.05;
@@ -137,40 +139,59 @@ export class GuitarRenderer {
     const neckStart = layout.strumZoneEnd;
     const neckEnd = layout.nutPosition;
 
-    const wood = context.createLinearGradient(0, 0, 0, layout.height);
+    // Without a top border, the neck also fills the safe area above it.
+    const hasBorder = layout.neckTop > layout.safeArea.top + 0.5;
+    const neckTop = hasBorder ? layout.neckTop : 0;
+    const neckHeight = layout.height - neckTop;
+
+    const wood = context.createLinearGradient(0, neckTop, 0, layout.height);
     wood.addColorStop(0, '#2a170c');
     wood.addColorStop(0.5, '#3d2414');
     wood.addColorStop(1, '#2a170c');
     context.fillStyle = wood;
-    context.fillRect(neckStart, 0, neckEnd - neckStart, layout.height);
+    context.fillRect(neckStart, neckTop, neckEnd - neckStart, neckHeight);
 
     // Headstock behind the nut.
     context.fillStyle = '#1b0f08';
-    context.fillRect(neckEnd + NUT_WIDTH, 0, layout.width, layout.height);
+    context.fillRect(neckEnd + NUT_WIDTH, neckTop, layout.width, neckHeight);
 
     // Dots in the middle of the cells of some frets.
-    const middleY = (layout.stringPositions[2] + layout.stringPositions[3]) / 2;
-    context.fillStyle = '#e9e3d3';
-    for (const fret of INLAY_FRETS) {
+    const dotRadius = Math.min(layout.stringSpacing * 0.17, layout.fretWidth * 0.2);
+    const dot = (fret: number, screenY: number) => {
       context.beginPath();
-      context.arc(layout.fretCellCenterAlong(fret), middleY, layout.stringSpacing * 0.17, 0, Math.PI * 2);
+      context.arc(layout.fretCellCenterAlong(fret), screenY, dotRadius, 0, Math.PI * 2);
       context.fill();
+    };
+    const positions = layout.stringPositions;
+    context.fillStyle = '#e9e3d3';
+    for (const fret of SINGLE_INLAY_FRETS.filter((fret) => fret <= layout.fretCount)) {
+      dot(fret, (positions[2] + positions[3]) / 2);
+    }
+    for (const fret of DOUBLE_INLAY_FRETS.filter((fret) => fret <= layout.fretCount)) {
+      dot(fret, (positions[1] + positions[2]) / 2);
+      dot(fret, (positions[3] + positions[4]) / 2);
     }
 
     // Fret bars.
-    for (let fret = 1; fret <= FRET_COUNT; fret++) {
+    for (let fret = 1; fret <= layout.fretCount; fret++) {
       const along = layout.fretBarAlong(fret);
       const metal = context.createLinearGradient(along - 3, 0, along + 3, 0);
       metal.addColorStop(0, '#6d6d6d');
       metal.addColorStop(0.5, '#f2f2f2');
       metal.addColorStop(1, '#7d7d7d');
       context.fillStyle = metal;
-      context.fillRect(along - 3, 0, 6, layout.height);
+      context.fillRect(along - 3, neckTop, 6, neckHeight);
     }
 
     // Nut.
     context.fillStyle = '#ece4cc';
-    context.fillRect(neckEnd, 0, NUT_WIDTH, layout.height);
+    context.fillRect(neckEnd, neckTop, NUT_WIDTH, neckHeight);
+
+    // Light edge along the upper side of the neck, like the binding of a real neck.
+    if (hasBorder) {
+      context.fillStyle = '#d8ccb0';
+      context.fillRect(neckStart, neckTop, layout.width - neckStart, 2);
+    }
   }
 
   private drawStrings(layout: Layout): void {
@@ -225,7 +246,7 @@ export class GuitarRenderer {
         context.shadowColor = 'rgba(255, 150, 40, 0.9)';
         context.shadowBlur = isSounding ? 16 : 0;
         context.beginPath();
-        context.arc(screenX, screenY, layout.stringSpacing * 0.32, 0, Math.PI * 2);
+        context.arc(screenX, screenY, Math.min(layout.stringSpacing * 0.32, layout.fretWidth * 0.4), 0, Math.PI * 2);
         context.fill();
         context.shadowBlur = 0;
       } else {

@@ -36,8 +36,29 @@
           <span>Show note names</span>
           <input type="checkbox" id="note-names-choice" />
         </label>
+        <div class="setting">
+          <span>Neck width, frets and strum area</span>
+          <button id="adjust-sizes" class="secondary">Adjust</button>
+        </div>
         <button id="settings-close" class="primary">Done</button>
       </div>
+    </div>
+
+    <!-- Size adjusting mode: covers the guitar, so nothing is played while adjusting. -->
+    <div id="adjust" hidden>
+      <div id="strum-handle" class="handle vertical-handle" aria-label="Border between strum area and neck">
+        <div class="knob">↔</div>
+      </div>
+      <div id="border-handle" class="handle horizontal-handle" aria-label="Upper edge of the neck">
+        <div id="border-knob" class="knob">↕</div>
+      </div>
+      <div id="fret-stepper" class="stepper">
+        <span>Frets</span>
+        <button id="fewer-frets" aria-label="Fewer frets">▼</button>
+        <output id="fret-count">5</output>
+        <button id="more-frets" aria-label="More frets">▲</button>
+      </div>
+      <button id="adjust-done" class="primary">Done</button>
     </div>
 
     <div id="start" class="overlay">

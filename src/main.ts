@@ -1,11 +1,12 @@
+import { SizeAdjuster } from './adjust';
 import { GuitarAudioEngine } from './audio/engine';
 import type { Tone } from './audio/tones';
 import { STRING_COUNT, fretChangeEffect, stringFrequency } from './guitar';
 import { GuitarInput, attachPointerEvents } from './input';
-import { Layout, type SafeArea } from './layout';
+import { DEFAULT_PROPORTIONS, type GuitarProportions, Layout, type SafeArea, limitProportions } from './layout';
 import { GuitarRenderer } from './render';
 
-interface Settings {
+interface Settings extends GuitarProportions {
   tone: Tone;
   /** Strum zone on the right and neck on the left instead of the other way round. */
   mirrored: boolean;
@@ -13,12 +14,20 @@ interface Settings {
 }
 
 const SETTINGS_STORAGE_KEY = 'guitarophone-settings';
-const DEFAULT_SETTINGS: Settings = { tone: 'crunch', mirrored: false, showNoteNames: true };
+const DEFAULT_SETTINGS: Settings = {
+  tone: 'crunch',
+  mirrored: false,
+  showNoteNames: true,
+  ...DEFAULT_PROPORTIONS,
+};
 
 function loadSettings(): Settings {
   try {
     const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
-    if (stored) return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
+    if (stored) {
+      const settings: Settings = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
+      return { ...settings, ...limitProportions(settings) };
+    }
   } catch {
     // Storage can be unavailable; the defaults work fine then.
   }
@@ -56,7 +65,7 @@ const audio = new GuitarAudioEngine();
 audio.setTone(settings.tone);
 
 const canvas = element<HTMLCanvasElement>('guitar');
-let layout = new Layout(window.innerWidth, window.innerHeight, readSafeArea(), settings.mirrored);
+let layout = new Layout(window.innerWidth, window.innerHeight, readSafeArea(), settings.mirrored, settings);
 let needsDrawing = true;
 
 const input = new GuitarInput(() => layout, {
@@ -86,15 +95,20 @@ for (let stringIndex = 0; stringIndex < STRING_COUNT; stringIndex++) {
   audio.setFrequency(stringIndex, stringFrequency(stringIndex, 0));
 }
 
-function updateLayout(): void {
-  layout = new Layout(window.innerWidth, window.innerHeight, readSafeArea(), settings.mirrored);
-  renderer.resize(layout.width, layout.height);
-  // The settings button sits in the top corner of the strum side.
-  const settingsButton = element('settings-button');
+/** Puts a button on the strum side, where it is out of the way of the neck. */
+function placeOnStrumSide(button: HTMLElement, distance: number): void {
   const side = settings.mirrored ? 'right' : 'left';
   const otherSide = settings.mirrored ? 'left' : 'right';
-  settingsButton.style[side] = `calc(env(safe-area-inset-${side}) + 6px)`;
-  settingsButton.style[otherSide] = '';
+  button.style[side] = `calc(env(safe-area-inset-${side}) + ${distance}px)`;
+  button.style[otherSide] = '';
+}
+
+function updateLayout(): void {
+  layout = new Layout(window.innerWidth, window.innerHeight, readSafeArea(), settings.mirrored, settings);
+  renderer.resize(layout.width, layout.height);
+  placeOnStrumSide(element('settings-button'), 6);
+  placeOnStrumSide(element('adjust-done'), 12);
+  sizeAdjuster.update();
   needsDrawing = true;
 }
 
@@ -160,6 +174,27 @@ noteNamesChoice.addEventListener('change', () => {
   settings.showNoteNames = noteNamesChoice.checked;
   saveSettings(settings);
   needsDrawing = true;
+});
+
+// Size adjusting mode, opened from the settings panel.
+const sizeAdjuster = new SizeAdjuster({
+  getLayout: () => layout,
+  getProportions: () => settings,
+  onChange(proportions) {
+    Object.assign(settings, proportions);
+    saveSettings(settings);
+    updateLayout();
+  },
+  onDone() {
+    sizeAdjuster.hide();
+    element('settings-button').hidden = false;
+  },
+});
+element('adjust-sizes').addEventListener('click', () => {
+  element('settings').hidden = true;
+  element('settings-button').hidden = true;
+  input.releaseAll();
+  sizeAdjuster.show();
 });
 
 updateLayout();

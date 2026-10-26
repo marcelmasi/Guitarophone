@@ -130,8 +130,8 @@ button {
   text-align: left;
 }
 
-.setting:last-of-type {
-  margin-bottom: 14px;
+#settings-close {
+  margin-top: 14px;
 }
 
 .setting input[type='checkbox'] {
@@ -157,6 +157,140 @@ button {
   background: var(--accent);
   color: var(--accent-text);
   font-weight: 600;
+}
+
+button:disabled {
+  opacity: 0.35;
+}
+
+.secondary {
+  flex-shrink: 0;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 6px 14px;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Size adjusting mode. */
+
+#adjust {
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+}
+
+#adjust[hidden] {
+  display: none;
+}
+
+.handle {
+  position: absolute;
+  touch-action: none;
+}
+
+/* The dashed line in the middle of the touch area of a handle. */
+.handle::before {
+  content: '';
+  position: absolute;
+  border: 0 dashed var(--accent);
+}
+
+.vertical-handle {
+  top: 0;
+  bottom: 0;
+  width: 44px;
+  transform: translateX(-50%);
+  cursor: ew-resize;
+}
+
+.vertical-handle::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left-width: 3px;
+  transform: translateX(-50%);
+}
+
+.vertical-handle .knob {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.horizontal-handle {
+  left: 0;
+  right: 0;
+  height: 44px;
+  transform: translateY(-50%);
+  cursor: ns-resize;
+}
+
+.horizontal-handle::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top-width: 3px;
+  transform: translateY(-50%);
+}
+
+/* Sits just below the line, so it stays visible when the line is at the screen edge. */
+.horizontal-handle .knob {
+  top: 50%;
+  transform: translate(-50%, 6px);
+}
+
+.knob {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: rgba(20, 13, 8, 0.85);
+  color: var(--accent);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 40px;
+  text-align: center;
+}
+
+.stepper {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom) + 8px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--accent);
+  background: rgba(20, 13, 8, 0.9);
+  font-weight: 600;
+}
+
+.stepper button {
+  width: 40px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 16px;
+}
+
+.stepper output {
+  min-width: 2ch;
+  text-align: center;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+#adjust-done {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom) + 8px);
+  padding: 14px 36px;
+  font-size: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* Only shown in a browser held upright; the apps are locked to landscape. */

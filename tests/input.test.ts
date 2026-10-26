@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { GuitarInput } from '../src/input';
-import { Layout } from '../src/layout';
+import { DEFAULT_PROPORTIONS, Layout } from '../src/layout';
 
 const layout = new Layout(844, 390, { top: 0, right: 0, bottom: 0, left: 0 }, false);
 
@@ -81,5 +81,22 @@ describe('guitar input', () => {
     input.pointerDown(1, layout.fretCellCenterAlong(2), layout.stringPositions[0], 0);
     input.pointerMove(1, layout.fretCellCenterAlong(2), layout.stringPositions[5], 10);
     expect(plucks).toEqual([]);
+  });
+
+  it('holds nothing with a finger in the border above the neck', () => {
+    const borderLayout = new Layout(844, 390, { top: 0, right: 0, bottom: 0, left: 0 }, false, {
+      ...DEFAULT_PROPORTIONS,
+      topBorderShare: 0.3,
+    });
+    const borderInput = new GuitarInput(() => borderLayout, {
+      onPluck: () => {},
+      onFretChange: () => {},
+    });
+    const fretAlong = borderLayout.fretCellCenterAlong(2);
+    borderInput.pointerDown(1, fretAlong, 10, 0);
+    expect(borderInput.frets).toEqual([0, 0, 0, 0, 0, 0]);
+    // Moving down onto the neck holds the low E string.
+    borderInput.pointerMove(1, fretAlong, borderLayout.stringPositions[0], 10);
+    expect(borderInput.frets[0]).toBe(2);
   });
 });

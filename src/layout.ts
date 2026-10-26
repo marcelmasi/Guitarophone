@@ -1,4 +1,4 @@
-import { FRET_COUNT, STRING_COUNT } from './guitar';
+import { STRING_COUNT } from './guitar';
 
 /** Screen edges covered by notches, rounded corners or the home indicator, in CSS pixels. */
 export interface SafeArea {
@@ -8,8 +8,51 @@ export interface SafeArea {
   left: number;
 }
 
-/** Share of the usable width that is used for strumming. The rest is the neck. */
-const STRUM_ZONE_SHARE = 0.36;
+/** Sizes of the guitar parts that the player can adjust. */
+export interface GuitarProportions {
+  /** Share of the usable width used for strumming. The rest is the neck. */
+  strumZoneShare: number;
+  /** Number of frets (bars) on the neck. */
+  fretCount: number;
+  /** Empty border above the low E string, as share of the usable height. It makes the neck narrower. */
+  topBorderShare: number;
+}
+
+export const DEFAULT_PROPORTIONS: GuitarProportions = {
+  strumZoneShare: 0.36,
+  fretCount: 5,
+  topBorderShare: 0,
+};
+
+export const MINIMUM_STRUM_ZONE_SHARE = 0.15;
+export const MAXIMUM_STRUM_ZONE_SHARE = 0.75;
+export const MINIMUM_FRET_COUNT = 1;
+export const MAXIMUM_FRET_COUNT = 12;
+/** Largest border, so that the strings keep at least about half of the height. */
+export const MAXIMUM_TOP_BORDER_SHARE = 0.45;
+
+/** Keeps proportions within their limits. Values that are not numbers fall back to the defaults. */
+export function limitProportions(proportions: GuitarProportions): GuitarProportions {
+  const limit = (value: number, minimum: number, maximum: number, fallback: number) =>
+    Number.isFinite(value) ? Math.min(Math.max(value, minimum), maximum) : fallback;
+  return {
+    strumZoneShare: limit(
+      proportions.strumZoneShare,
+      MINIMUM_STRUM_ZONE_SHARE,
+      MAXIMUM_STRUM_ZONE_SHARE,
+      DEFAULT_PROPORTIONS.strumZoneShare,
+    ),
+    fretCount: Math.round(
+      limit(proportions.fretCount, MINIMUM_FRET_COUNT, MAXIMUM_FRET_COUNT, DEFAULT_PROPORTIONS.fretCount),
+    ),
+    topBorderShare: limit(
+      proportions.topBorderShare,
+      0,
+      MAXIMUM_TOP_BORDER_SHARE,
+      DEFAULT_PROPORTIONS.topBorderShare,
+    ),
+  };
+}
 
 /** Width of the nut in CSS pixels. */
 export const NUT_WIDTH = 10;
@@ -22,36 +65,48 @@ export const NUT_WIDTH = 10;
  * When `mirrored` is set, the strum side is the right edge.
  */
 export class Layout {
-  /** Along value where the strum zone ends and the neck (fret 5) starts. */
+  /** Along value where the strum zone ends and the neck (highest fret) starts. */
   readonly strumZoneEnd: number;
   /** Along value of the nut edge facing the frets. */
   readonly nutPosition: number;
+  /** Number of frets on the neck. */
+  readonly fretCount: number;
   /** Width of one fret cell in CSS pixels. */
   readonly fretWidth: number;
+  /** Vertical screen position of the upper edge of the neck, where the top border ends. */
+  readonly neckTop: number;
   /** Vertical screen position of each string, index 0 (low E) at the top. */
   readonly stringPositions: number[];
   /** Vertical distance between two neighbouring strings in CSS pixels. */
   readonly stringSpacing: number;
+  /** Width in CSS pixels outside the safe area on the strum side. */
+  private readonly strumSideInset: number;
+  /** Width and height in CSS pixels inside the safe area. */
+  private readonly usableWidth: number;
+  private readonly usableHeight: number;
 
   constructor(
     readonly width: number,
     readonly height: number,
     readonly safeArea: SafeArea,
     readonly mirrored: boolean,
+    proportions: GuitarProportions = DEFAULT_PROPORTIONS,
   ) {
-    const strumSideInset = mirrored ? safeArea.right : safeArea.left;
+    this.strumSideInset = mirrored ? safeArea.right : safeArea.left;
     const nutSideInset = mirrored ? safeArea.left : safeArea.right;
-    const usableWidth = width - strumSideInset - nutSideInset;
+    this.usableWidth = width - this.strumSideInset - nutSideInset;
+    this.usableHeight = height - safeArea.top - safeArea.bottom;
 
     this.nutPosition = width - nutSideInset - NUT_WIDTH;
-    this.strumZoneEnd = strumSideInset + usableWidth * STRUM_ZONE_SHARE;
-    this.fretWidth = (this.nutPosition - this.strumZoneEnd) / FRET_COUNT;
+    this.strumZoneEnd = this.strumSideInset + this.usableWidth * proportions.strumZoneShare;
+    this.fretCount = proportions.fretCount;
+    this.fretWidth = (this.nutPosition - this.strumZoneEnd) / this.fretCount;
 
-    const usableHeight = height - safeArea.top - safeArea.bottom;
-    this.stringSpacing = usableHeight / STRING_COUNT;
+    this.neckTop = safeArea.top + this.usableHeight * proportions.topBorderShare;
+    this.stringSpacing = (height - safeArea.bottom - this.neckTop) / STRING_COUNT;
     this.stringPositions = Array.from(
       { length: STRING_COUNT },
-      (_, stringIndex) => safeArea.top + this.stringSpacing * (stringIndex + 0.5),
+      (_, stringIndex) => this.neckTop + this.stringSpacing * (stringIndex + 0.5),
     );
   }
 
@@ -65,8 +120,23 @@ export class Layout {
     return this.mirrored ? this.width - along : along;
   }
 
+  /** Strum zone share that puts the end of the strum zone at the given along value. */
+  strumZoneShareAt(along: number): number {
+    return (along - this.strumSideInset) / this.usableWidth;
+  }
+
+  /** Top border share that puts the upper edge of the neck at the given vertical screen position. */
+  topBorderShareAt(screenY: number): number {
+    return (screenY - this.safeArea.top) / this.usableHeight;
+  }
+
   isInStrumZone(along: number): boolean {
     return along < this.strumZoneEnd;
+  }
+
+  /** True above the neck, in the top border. */
+  isAboveNeck(screenY: number): boolean {
+    return screenY < this.neckTop;
   }
 
   /** Along value of the fret bar with the given number (0 = nut). */
@@ -87,7 +157,7 @@ export class Layout {
     if (this.isInStrumZone(along)) return null;
     if (along >= this.nutPosition) return 0;
     const fret = Math.floor((this.nutPosition - along) / this.fretWidth) + 1;
-    return Math.min(Math.max(fret, 1), FRET_COUNT);
+    return Math.min(Math.max(fret, 1), this.fretCount);
   }
 
   /** Index of the string closest to the given vertical screen position. */
