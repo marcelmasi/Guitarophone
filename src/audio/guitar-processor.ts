@@ -42,7 +42,7 @@ class GuitarProcessor extends AudioWorkletProcessor {
         });
         break;
       case 'setFrequency':
-        voice.setFrequency(message.frequency);
+        voice.setFrequency(message.frequency, message.glide);
         break;
       case 'mute':
         voice.mute();

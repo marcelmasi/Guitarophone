@@ -102,4 +102,20 @@ describe('string voice', () => {
     hard.pluck(1);
     expect(loudness(render(hard, 4800))).toBeGreaterThan(loudness(render(soft, 4800)) * 2);
   });
+
+  it('glides smoothly to a new pitch, like a bent string', () => {
+    const voice = new StringVoice(SAMPLE_RATE, 196, 5, seededRandom(6));
+    voice.pluck(0.8);
+    render(voice, 2000);
+    const bentFrequency = 196 * 2 ** (2 / 12);
+    voice.setFrequency(bentFrequency, true);
+    // Right after the change, the pitch is still on its way up.
+    const halfway = estimatePitch(render(voice, 2048), 180, 240);
+    expect(halfway).toBeGreaterThan(196 * 1.005);
+    expect(halfway).toBeLessThan(bentFrequency * 0.995);
+    // A little later it has arrived.
+    render(voice, 2000);
+    const arrived = estimatePitch(render(voice, 8192), 180, 240);
+    expect(Math.abs(1200 * Math.log2(arrived / bentFrequency))).toBeLessThan(3);
+  });
 });

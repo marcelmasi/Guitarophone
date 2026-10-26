@@ -17,6 +17,11 @@ describe('tuning', () => {
     expect(stringNote(3, 4)).toBe(stringNote(4, 0));
   });
 
+  it('raises the pitch of a bent string by the bend in semitones', () => {
+    expect(stringFrequency(3, 7, 2)).toBeCloseTo(stringFrequency(3, 9));
+    expect(stringFrequency(0, 0, 0.5)).toBeCloseTo(82.41 * 2 ** (0.5 / 12), 1);
+  });
+
   it('mutes a string only when the last finger is lifted', () => {
     expect(fretChangeEffect(3, 0)).toBe('mute');
     expect(fretChangeEffect(3, 1)).toBe('pitch');

@@ -19,9 +19,12 @@ export function noteFrequency(midiNote: number): number {
   return 440 * 2 ** ((midiNote - 69) / 12);
 }
 
-/** Frequency in hertz of a string when held down at the given fret (0 = open string). */
-export function stringFrequency(stringIndex: number, fret: number): number {
-  return noteFrequency(stringNote(stringIndex, fret));
+/**
+ * Frequency in hertz of a string when held down at the given fret (0 = open string)
+ * and bent up by `bend` semitones.
+ */
+export function stringFrequency(stringIndex: number, fret: number, bend = 0): number {
+  return noteFrequency(stringNote(stringIndex, fret) + bend);
 }
 
 /** Note name without octave, e.g. "F♯". */

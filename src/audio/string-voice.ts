@@ -6,6 +6,8 @@ const MUTED_SUSTAIN = 0.1;
 const REPLUCK_REMAINDER = 0.25;
 /** Position of the pick from the bridge, as share of the vibrating string length. */
 const PICK_POSITION = 0.13;
+/** Time in seconds for a gliding pitch change to cover about two thirds of the way. Smooths bends. */
+const GLIDE_TIME = 0.008;
 
 /**
  * One guitar string, simulated with the Karplus-Strong method: a burst of noise circulates
@@ -21,6 +23,10 @@ export class StringVoice {
   private writeIndex = 0;
   /** Delay in samples between writing and reading the loop. */
   private delay = 0;
+  /** Delay that a gliding pitch change moves towards. */
+  private targetDelay = 0;
+  /** Share of the remaining way to `targetDelay` that is covered per sample. */
+  private readonly glideStep: number;
   /** Gain applied once per round through the loop. Sets how long the string rings. */
   private loopGain = 1;
   private frequency = 0;
@@ -38,13 +44,19 @@ export class StringVoice {
     private readonly sustain: number,
     private readonly random: () => number = Math.random,
   ) {
+    this.glideStep = 1 - Math.exp(-1 / (GLIDE_TIME * sampleRate));
     this.setFrequency(frequency);
   }
 
-  setFrequency(frequency: number): void {
+  /**
+   * Sets the pitch in hertz. With `glide`, the pitch moves smoothly to the new value, like a
+   * bent string; without, it jumps, like a finger landing on another fret.
+   */
+  setFrequency(frequency: number, glide = false): void {
     this.frequency = frequency;
     // The averaging filter in the loop adds half a sample of delay.
-    this.delay = Math.min(this.sampleRate / frequency - 0.5, BUFFER_LENGTH - 2);
+    this.targetDelay = Math.min(this.sampleRate / frequency - 0.5, BUFFER_LENGTH - 2);
+    if (!glide) this.delay = this.targetDelay;
     this.updateLoopGain();
   }
 
@@ -92,6 +104,10 @@ export class StringVoice {
   }
 
   nextSample(): number {
+    if (this.delay !== this.targetDelay) {
+      this.delay += (this.targetDelay - this.delay) * this.glideStep;
+      if (Math.abs(this.targetDelay - this.delay) < 1e-4) this.delay = this.targetDelay;
+    }
     const sample = this.loopGain * 0.5 * (this.read(this.delay) + this.read(this.delay + 1));
     this.buffer[this.writeIndex] = sample;
     this.writeIndex = (this.writeIndex + 1) % BUFFER_LENGTH;

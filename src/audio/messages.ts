@@ -8,8 +8,8 @@ export type GuitarMessage =
       /** Time to wait before the pluck sounds, in seconds. */
       delaySeconds: number;
     }
-  /** Sets the pitch in hertz, also while the string rings. */
-  | { type: 'setFrequency'; stringIndex: number; frequency: number }
+  /** Sets the pitch in hertz, also while the string rings. With `glide`, the pitch moves there smoothly. */
+  | { type: 'setFrequency'; stringIndex: number; frequency: number; glide: boolean }
   | { type: 'mute'; stringIndex: number };
 
 /** Name the guitar sound processor is registered with. */

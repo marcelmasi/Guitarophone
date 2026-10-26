@@ -207,29 +207,49 @@ export class GuitarRenderer {
       const amplitude =
         this.strengthAt(motion, now) * layout.stringSpacing * 0.16 * Math.sin(now * WOBBLE_FREQUENCY * Math.PI * 2);
 
-      context.lineCap = 'round';
-      context.strokeStyle = stringIndex < 3 ? '#b9ae98' : '#dedede';
-      context.lineWidth = thickness;
-      context.beginPath();
-      context.moveTo(0, stringY + amplitude);
+      // A bent string is pushed sideways at the finger and runs straight from there to the nut
+      // and to the start of the neck.
+      const bendOffset = fret > 0 ? this.bendOffset(stringIndex, fret) : 0;
+      const fingerAlong = layout.fretCellCenterAlong(fret);
+      const bendAt = (along: number) =>
+        along <= layout.strumZoneEnd
+          ? 0
+          : (bendOffset * (along - layout.strumZoneEnd)) / (fingerAlong - layout.strumZoneEnd);
+
+      const points: [number, number][] = [];
       const steps = 24;
-      for (let step = 1; step <= steps; step++) {
+      for (let step = 0; step <= steps; step++) {
         const share = step / steps;
+        const along = share * vibratingEnd;
         // The middle of the string is near the screen edge on the strum side, so the
         // swing is largest there and goes down to zero at the fret.
-        context.lineTo(share * vibratingEnd, stringY + amplitude * Math.cos((Math.PI / 2) * share));
+        points.push([along, stringY + amplitude * Math.cos((Math.PI / 2) * share) + bendAt(along)]);
       }
-      context.lineTo(stringEnd, stringY);
-      context.stroke();
+      if (fret > 0) points.push([fingerAlong, stringY + bendOffset], [layout.nutPosition, stringY]);
+      points.push([stringEnd, stringY]);
 
-      // Light reflection on top of the string.
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+      context.strokeStyle = stringIndex < 3 ? '#b9ae98' : '#dedede';
+      context.lineWidth = thickness;
+      strokeLine(context, points, 0);
+
+      // Light reflection on top of the string, on the part that does not vibrate.
       context.strokeStyle = 'rgba(255, 255, 255, 0.35)';
       context.lineWidth = Math.max(thickness * 0.3, 0.5);
-      context.beginPath();
-      context.moveTo(vibratingEnd, stringY - thickness * 0.2);
-      context.lineTo(stringEnd, stringY - thickness * 0.2);
-      context.stroke();
+      strokeLine(context, points.slice(steps), -thickness * 0.2);
     });
+  }
+
+  /** Sideways push in CSS pixels of the finger that holds a string at its sounding fret. */
+  private bendOffset(stringIndex: number, fret: number): number {
+    let offset = 0;
+    for (const touch of this.input.touches.values()) {
+      if (touch.role === 'fret' && touch.stringIndex === stringIndex && touch.fret === fret) {
+        if (Math.abs(touch.bendOffset) > Math.abs(offset)) offset = touch.bendOffset;
+      }
+    }
+    return offset;
   }
 
   private drawFingers(layout: Layout): void {
@@ -238,9 +258,9 @@ export class GuitarRenderer {
     for (const touch of this.input.touches.values()) {
       if (touch.role === 'fret') {
         if (touch.fret === 0) continue;
-        // The finger snaps to the middle of its fret cell on its string.
+        // The finger snaps to the middle of its fret cell on its string, pushed sideways when bending.
         const screenX = layout.screenXFromAlong(layout.fretCellCenterAlong(touch.fret));
-        const screenY = layout.stringPositions[touch.stringIndex];
+        const screenY = layout.stringPositions[touch.stringIndex] + touch.bendOffset;
         const isSounding = frets[touch.stringIndex] === touch.fret;
         context.fillStyle = isSounding ? 'rgba(255, 170, 60, 0.85)' : 'rgba(255, 170, 60, 0.35)';
         context.shadowColor = 'rgba(255, 150, 40, 0.9)';
@@ -266,16 +286,25 @@ export class GuitarRenderer {
     context.textAlign = 'center';
     const along = layout.strumZoneEnd - fontSize * 1.4;
     const screenX = layout.screenXFromAlong(along);
-    this.input.frets.forEach((fret, stringIndex) => {
+    this.input.strings.forEach(({ fret, bend }, stringIndex) => {
       const screenY = layout.stringPositions[stringIndex] - layout.stringSpacing * 0.26;
       context.fillStyle = fret > 0 ? '#ffc070' : 'rgba(255, 255, 255, 0.75)';
-      context.fillText(noteName(stringNote(stringIndex, fret)), screenX, screenY);
+      // A bent string shows the note it is closest to.
+      context.fillText(noteName(Math.round(stringNote(stringIndex, fret) + bend)), screenX, screenY);
     });
   }
 
   private strengthAt(motion: StringMotion, now: number): number {
     return motion.strength * Math.exp(-(now - motion.startTime) / motion.fadeTime);
   }
+}
+
+/** Draws a line through the points, shifted vertically by `shift` CSS pixels. */
+function strokeLine(context: CanvasRenderingContext2D, points: [number, number][], shift: number): void {
+  context.beginPath();
+  context.moveTo(points[0][0], points[0][1] + shift);
+  for (const [along, screenY] of points.slice(1)) context.lineTo(along, screenY + shift);
+  context.stroke();
 }
 
 function roundedRectangle(

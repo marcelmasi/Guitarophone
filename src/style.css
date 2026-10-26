@@ -134,6 +134,12 @@ button {
   margin-top: 14px;
 }
 
+.setting small {
+  display: block;
+  color: var(--muted-text);
+  font-size: 13px;
+}
+
 .setting input[type='checkbox'] {
   width: 22px;
   height: 22px;

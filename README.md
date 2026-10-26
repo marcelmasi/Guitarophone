@@ -18,6 +18,8 @@ Like on a real guitar:
 
 In the settings (gear button) you can choose the amp tone (Clean, Crunch, Lead), swap the sides (strum on the right), and show or hide the note names.
 
+You can also turn on **string bending** (off by default). Then a finger holding a string keeps that string, and pushing it towards another string bends the note up, in either direction, like on a real guitar. Small finger movements, up to 40 % of the string spacing, do nothing, so chords stay in tune. Beyond that, another 0.8 string spacings bend a whole step; the largest bend is 3 semitones.
+
 With **Adjust** in the settings, you change the sizes right on the guitar by dragging handles:
 
 - the upper edge of the neck: adds an empty border above the low E string, which makes the neck narrower,

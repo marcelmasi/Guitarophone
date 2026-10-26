@@ -89,9 +89,12 @@ export class GuitarAudioEngine {
     this.send({ type: 'pluck', stringIndex, velocity, delaySeconds });
   }
 
-  /** Sets the pitch of a string in hertz. A ringing string keeps ringing at the new pitch. */
-  setFrequency(stringIndex: number, frequency: number): void {
-    this.send({ type: 'setFrequency', stringIndex, frequency });
+  /**
+   * Sets the pitch of a string in hertz. A ringing string keeps ringing at the new pitch.
+   * With `glide`, the pitch moves there smoothly, like a bent string.
+   */
+  setFrequency(stringIndex: number, frequency: number, glide = false): void {
+    this.send({ type: 'setFrequency', stringIndex, frequency, glide });
   }
 
   mute(stringIndex: number): void {

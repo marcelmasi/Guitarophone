@@ -11,6 +11,8 @@ interface Settings extends GuitarProportions {
   /** Strum zone on the right and neck on the left instead of the other way round. */
   mirrored: boolean;
   showNoteNames: boolean;
+  /** Moving a fretting finger across the strings bends its string up. */
+  bending: boolean;
 }
 
 const SETTINGS_STORAGE_KEY = 'guitarophone-settings';
@@ -18,6 +20,7 @@ const DEFAULT_SETTINGS: Settings = {
   tone: 'crunch',
   mirrored: false,
   showNoteNames: true,
+  bending: false,
   ...DEFAULT_PROPORTIONS,
 };
 
@@ -74,14 +77,17 @@ const input = new GuitarInput(() => layout, {
     audio.pluck(stringIndex, velocity, delaySeconds);
     renderer.notePluck(stringIndex, velocity);
   },
-  onFretChange(stringIndex, previousFret, newFret) {
-    if (fretChangeEffect(previousFret, newFret) === 'mute') {
+  onStringChange(stringIndex, previous, next) {
+    if (fretChangeEffect(previous.fret, next.fret) === 'mute') {
       audio.mute(stringIndex);
       renderer.noteMute(stringIndex);
     }
-    audio.setFrequency(stringIndex, stringFrequency(stringIndex, newFret));
+    // A bend on the same fret glides smoothly; a new fret jumps, like on a real guitar.
+    const glide = previous.fret === next.fret;
+    audio.setFrequency(stringIndex, stringFrequency(stringIndex, next.fret, next.bend), glide);
   },
 });
+input.bendingEnabled = settings.bending;
 const renderer = new GuitarRenderer(canvas, input);
 attachPointerEvents(canvas, input);
 canvas.addEventListener('pointerdown', () => {
@@ -140,6 +146,7 @@ element('start-button').addEventListener('click', () => {
 const toneButtons = Array.from(element('tone-choice').querySelectorAll<HTMLButtonElement>('button'));
 const mirroredChoice = element<HTMLInputElement>('mirrored-choice');
 const noteNamesChoice = element<HTMLInputElement>('note-names-choice');
+const bendingChoice = element<HTMLInputElement>('bending-choice');
 
 function showSettings(): void {
   for (const button of toneButtons) {
@@ -147,6 +154,7 @@ function showSettings(): void {
   }
   mirroredChoice.checked = settings.mirrored;
   noteNamesChoice.checked = settings.showNoteNames;
+  bendingChoice.checked = settings.bending;
 }
 
 element('settings-button').addEventListener('click', () => {
@@ -174,6 +182,11 @@ noteNamesChoice.addEventListener('change', () => {
   settings.showNoteNames = noteNamesChoice.checked;
   saveSettings(settings);
   needsDrawing = true;
+});
+bendingChoice.addEventListener('change', () => {
+  settings.bending = bendingChoice.checked;
+  input.bendingEnabled = settings.bending;
+  saveSettings(settings);
 });
 
 // Size adjusting mode, opened from the settings panel.
