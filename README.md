@@ -1,8 +1,6 @@
 # Guitarophone
 
-[![Video of Guitarophone being played: a finger bends the G string on fret 3](docs/video-preview.jpg)](docs/Guitarophone.mp4)
-
-▶ [Watch the video](docs/Guitarophone.mp4) (with sound)
+https://github.com/user-attachments/assets/aaa2a443-1a1e-4d6f-ab31-9d36a46fa293
 
 Turns your phone into an electric guitar, for iOS and Android.
 
