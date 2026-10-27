@@ -86,5 +86,4 @@ In the sizes App Store Connect asks for. Apple makes the smaller sizes from thes
 | Folder | Device size in App Store Connect | Size in pixels |
 | --- | --- | --- |
 | [`iphone/`](iphone) | iPhone 6.9" display | 2868 × 1320 |
-
-While the app also runs on iPad, App Store Connect also needs screenshots for the iPad 13" display (2752 × 2064 pixels).
+| [`ipad/`](ipad) | iPad 13" display | 2752 × 2064 |
