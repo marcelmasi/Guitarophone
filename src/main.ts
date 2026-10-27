@@ -128,9 +128,9 @@ function drawLoop(): void {
 }
 
 window.addEventListener('resize', updateLayout);
-// The safe area can arrive after start without a resize. The probe's size is made of the
-// safe area paddings, so watching its size catches every change.
-new ResizeObserver(updateLayout).observe(element('safe-area-probe'));
+// The safe area can arrive after start without a resize. The probe has no content, so its
+// border box is made of the safe area paddings only, and watching it catches every change.
+new ResizeObserver(updateLayout).observe(element('safe-area-probe'), { box: 'border-box' });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) input.releaseAll();
   else audio.resume();
