@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "description": "Turns your phone into an electric guitar.",
+  "license": "MIT",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",

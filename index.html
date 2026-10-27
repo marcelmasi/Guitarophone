@@ -19,6 +19,7 @@
 
     <div id="settings" class="overlay" hidden>
       <div class="panel">
+        <button id="licenses-button" class="corner-link">Licenses</button>
         <h2>Settings</h2>
         <div class="setting">
           <span>Amp tone</span>
@@ -51,13 +52,22 @@
       </div>
     </div>
 
+    <!-- Licenses of the software included in the app, opened from the settings panel. -->
+    <div id="licenses" class="overlay" hidden>
+      <div class="panel licenses-panel">
+        <h2>Licenses</h2>
+        <pre id="licenses-text"></pre>
+        <button id="licenses-close" class="primary">Done</button>
+      </div>
+    </div>
+
     <!-- Size adjusting mode: covers the guitar, so nothing is played while adjusting. -->
     <div id="adjust" hidden>
       <div id="strum-handle" class="handle vertical-handle" aria-label="Border between strum area and neck">
-        <div class="knob">↔</div>
+        <div class="knob">↔︎</div>
       </div>
       <div id="border-handle" class="handle horizontal-handle" aria-label="Upper edge of the neck">
-        <div id="border-knob" class="knob">↕</div>
+        <div id="border-knob" class="knob">↕︎</div>
       </div>
       <div id="fret-stepper" class="stepper">
         <span>Frets</span>

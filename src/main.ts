@@ -5,6 +5,7 @@ import { STRING_COUNT, fretChangeEffect, stringFrequency } from './guitar';
 import { GuitarInput, attachPointerEvents } from './input';
 import { DEFAULT_PROPORTIONS, type GuitarProportions, Layout, type SafeArea, limitProportions } from './layout';
 import { GuitarRenderer } from './render';
+import thirdPartyLicenses from '../THIRD-PARTY-LICENSES.txt?raw';
 
 interface Settings extends GuitarProportions {
   tone: Tone;
@@ -187,6 +188,17 @@ bendingChoice.addEventListener('change', () => {
   settings.bending = bendingChoice.checked;
   input.bendingEnabled = settings.bending;
   saveSettings(settings);
+});
+
+// Licenses of the software included in the app, opened from the settings panel.
+element('licenses-text').textContent = thirdPartyLicenses;
+element('licenses-button').addEventListener('click', () => {
+  element('settings').hidden = true;
+  element('licenses').hidden = false;
+});
+element('licenses-close').addEventListener('click', () => {
+  element('licenses').hidden = true;
+  element('settings').hidden = false;
 });
 
 // Size adjusting mode, opened from the settings panel.
