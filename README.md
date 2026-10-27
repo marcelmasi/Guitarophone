@@ -61,3 +61,13 @@ npm run android   # build, copy to the Android project and open Android Studio
 ```
 
 After changing the web code, run `npm run sync` to copy it into both native projects.
+
+## Privacy
+
+The app collects no data. See [PRIVACY.md](PRIVACY.md).
+
+## License
+
+Guitarophone is open source under the [MIT license](LICENSE). The license covers the code, but not the name "Guitarophone" or the app icon, so please don't use them for your own versions of the app.
+
+The apps include software from others: Capacitor, parts of Apache Cordova and, in the Android app, AndroidX and Kotlin libraries. Their licenses are in [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt), and the app shows them under Settings → Licenses.
