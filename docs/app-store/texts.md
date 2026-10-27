@@ -81,9 +81,10 @@ No login is needed. The app works only in landscape: hold the phone sideways. Ta
 
 ## Screenshots
 
-In the sizes App Store Connect asks for. Apple makes the smaller sizes from these.
+In the sizes App Store Connect asks for. Apple makes the other sizes from these.
 
-| Folder | Device size in App Store Connect | Size in pixels |
+| Folder | Display in App Store Connect | Size in pixels |
 | --- | --- | --- |
-| [`iphone/`](iphone) | iPhone 6.9" display | 2868 × 1320 |
-| [`ipad/`](ipad) | iPad 13" display | 2752 × 2064 |
+| [`iphone-6.3/`](iphone-6.3) | iPhone with Dynamic Island, medium display (iPhone 17 Pro). Required. | 2622 × 1206 |
+| [`iphone-6.9/`](iphone-6.9) | iPhone with Dynamic Island, large display (iPhone 17 Pro Max). Optional. | 2868 × 1320 |
+| [`ipad/`](ipad) | iPad 13" display. Required, because the app also runs on iPad. | 2752 × 2064 |
