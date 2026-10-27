@@ -1,7 +1,6 @@
 # Guitarophone
 
 https://github.com/user-attachments/assets/aaa2a443-1a1e-4d6f-ab31-9d36a46fa293
-(unmute the audio in the video player to hear it)
 
 Turns your phone into an electric guitar, for iOS and Android.
 
