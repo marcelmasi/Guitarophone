@@ -71,6 +71,11 @@ export class GuitarAudioEngine {
     if (this.context.state !== 'running') void this.context.resume();
   }
 
+  /** Stops the sound, for example while the app is in the background. `resume` starts it again. */
+  suspend(): void {
+    if (this.context.state !== 'closed') void this.context.suspend();
+  }
+
   get isRunning(): boolean {
     return this.context.state === 'running';
   }
