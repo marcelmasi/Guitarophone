@@ -7,6 +7,7 @@ import { GuitarInput, attachPointerEvents } from './input';
 import { DEFAULT_PROPORTIONS, type GuitarProportions, Layout, type SafeArea, limitProportions } from './layout';
 import { GuitarRenderer } from './render';
 import thirdPartyLicenses from '../THIRD-PARTY-LICENSES.txt?raw';
+import appIconUrl from './app-icon.jpg';
 
 interface Settings extends GuitarProportions {
   tone: Tone;
@@ -64,6 +65,14 @@ function readSafeArea(): SafeArea {
 // Let the sound play even when the iPhone's silent switch is on (Safari 16.4 and newer).
 const audioSession = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
 if (audioSession) audioSession.type = 'playback';
+// Because of this, iOS shows the running sound as a media player in Notification Center.
+// Without a title, the player would show the web address of the app ("localhost").
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: 'Guitarophone',
+    artwork: [{ src: appIconUrl, sizes: '256x256', type: 'image/jpeg' }],
+  });
+}
 
 const settings = loadSettings();
 const audio = new GuitarAudioEngine();
@@ -133,8 +142,12 @@ window.addEventListener('resize', updateLayout);
 // border box is made of the safe area paddings only, and watching it catches every change.
 new ResizeObserver(updateLayout).observe(element('safe-area-probe'), { box: 'border-box' });
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) input.releaseAll();
-  else audio.resume();
+  if (document.hidden) {
+    input.releaseAll();
+    // Without running sound, iOS also removes the media player from Notification Center and the
+    // lock screen, so it does not stay there while the app is in the background.
+    audio.suspend();
+  } else audio.resume();
   needsDrawing = true;
 });
 
