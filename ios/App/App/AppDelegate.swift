@@ -48,8 +48,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-/// Swipes from the screen edges go to the guitar first, so strumming near an edge does not
-/// open Control Center or switch apps. A second swipe still reaches the system.
+/// Swipes from the screen edges go to the guitar first, so strumming near an edge does not open
+/// Notification Center, Control Center or the app switcher. A second swipe right after the first
+/// still reaches the system.
 class GuitarViewController: CAPBridgeViewController {
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge { .all }
+
+    // iOS does not hold back swipes from the bottom edge while the home indicator hides itself.
+    // The SystemBars setting hides it, and Capacitor does not let subclasses change that, so UIKit
+    // asks this plain view controller instead, which keeps the home indicator visible.
+    private let visibleHomeIndicator = UIViewController()
+    override var childForHomeIndicatorAutoHidden: UIViewController? { visibleHomeIndicator }
 }

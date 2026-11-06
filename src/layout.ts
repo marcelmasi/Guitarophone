@@ -30,6 +30,14 @@ export const MINIMUM_FRET_COUNT = 1;
 export const MAXIMUM_FRET_COUNT = 12;
 /** Largest border, so that the strings keep at least about half of the height. */
 export const MAXIMUM_TOP_BORDER_SHARE = 0.45;
+/**
+ * Distance in CSS pixels that the outer strings keep from the top and bottom screen edges.
+ * Swipes that start very close to these edges open Notification Center or the app switcher
+ * (on iPhone within about 20 pixels of the top edge), so strums should start further in.
+ */
+export const OUTER_STRING_EDGE_DISTANCE = 60;
+/** Largest edge distance as share of the screen height, so that short screens keep room for the strings. */
+const MAXIMUM_EDGE_DISTANCE_SHARE = 0.15;
 
 /** Keeps proportions within their limits. Values that are not numbers fall back to the defaults. */
 export function limitProportions(proportions: GuitarProportions): GuitarProportions {
@@ -103,10 +111,16 @@ export class Layout {
     this.fretWidth = (this.nutPosition - this.strumZoneEnd) / this.fretCount;
 
     this.neckTop = safeArea.top + this.usableHeight * proportions.topBorderShare;
-    this.stringSpacing = (height - safeArea.bottom - this.neckTop) / STRING_COUNT;
+    // Each string sits in the middle of an equal part of the neck height, but the outer strings
+    // keep their distance to the screen edges. The other strings are spread evenly between them.
+    const edgeDistance = Math.min(OUTER_STRING_EDGE_DISTANCE, height * MAXIMUM_EDGE_DISTANCE_SHARE);
+    const heightPerString = (height - safeArea.bottom - this.neckTop) / STRING_COUNT;
+    const topStringPosition = Math.max(this.neckTop + heightPerString / 2, edgeDistance);
+    const bottomStringPosition = Math.min(height - safeArea.bottom - heightPerString / 2, height - edgeDistance);
+    this.stringSpacing = (bottomStringPosition - topStringPosition) / (STRING_COUNT - 1);
     this.stringPositions = Array.from(
       { length: STRING_COUNT },
-      (_, stringIndex) => this.neckTop + this.stringSpacing * (stringIndex + 0.5),
+      (_, stringIndex) => topStringPosition + this.stringSpacing * stringIndex,
     );
   }
 

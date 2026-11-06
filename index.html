@@ -19,6 +19,7 @@
 
     <div id="settings" class="overlay" hidden>
       <div class="panel">
+        <button id="help-button" class="corner-link left-corner" hidden>Help</button>
         <button id="licenses-button" class="corner-link">Licenses</button>
         <h2>Settings</h2>
         <div class="setting">
@@ -49,6 +50,26 @@
           <button id="adjust-sizes" class="secondary">Adjust</button>
         </div>
         <button id="settings-close" class="primary">Done</button>
+      </div>
+    </div>
+
+    <!-- Help about swipes from the screen edges, opened from the settings panel of the iOS app. -->
+    <div id="help" class="overlay" hidden>
+      <div class="panel help-panel">
+        <h2>Strumming near the edges</h2>
+        <p>
+          A swipe that starts right at the top or bottom edge of the screen can open Notification Center or the app
+          switcher. The guitar catches a single swipe, but a second one right after it reaches iOS.
+        </p>
+        <p>
+          Start your strums a bit away from the edges, or keep your finger on the screen while strumming up and
+          down.
+        </p>
+        <p>
+          To block these swipes completely, turn on Guided Access in the iOS settings under Accessibility. Then
+          triple-click the side button while playing. Triple-click it again to end Guided Access.
+        </p>
+        <button id="help-close" class="primary">Done</button>
       </div>
     </div>
 

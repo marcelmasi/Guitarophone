@@ -21,6 +21,9 @@ body {
   background: var(--background);
   color: var(--text);
   font-family: -apple-system, system-ui, sans-serif;
+  /* iOS would make text in wide blocks bigger in landscape. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   /* No text selection, magnifier, zoom or scrolling while playing. */
   user-select: none;
   -webkit-user-select: none;
@@ -145,6 +148,20 @@ button {
   padding: 0;
   color: var(--muted-text);
   font-size: 13px;
+}
+
+/* The same in the upper left corner. */
+.corner-link.left-corner {
+  right: auto;
+  left: 22px;
+}
+
+.help-panel {
+  max-width: 640px;
+}
+
+.help-panel p {
+  text-align: left;
 }
 
 /* Only the license text scrolls; the title and the button stay in place. */
