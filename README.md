@@ -26,6 +26,15 @@ With **Adjust** in the settings, you change the sizes right on the guitar by dra
 - the line between strum area and neck,
 - and the number of frets (1 to 12).
 
+### Strumming near the screen edges
+
+A swipe that starts right at the top or bottom edge of the screen can open Notification Center or the app switcher. Apps cannot turn this off completely, so the app makes it rare:
+
+- The outer strings keep about 1 cm (60 points) away from the top and bottom edges, so strums start further in. On iPhone, only swipes that start within about 20 points of the top edge open Notification Center.
+- On iOS, a single swipe from an edge goes to the guitar. Only a second swipe right after it opens Notification Center or the app switcher.
+
+To block them completely on iOS, turn on Guided Access (Settings → Accessibility → Guided Access) and triple-click the side button while playing. Triple-click again to end it. The iOS app explains this too, under Help in the settings.
+
 ## How it works
 
 The app is a web app (TypeScript, no framework) packaged as a native app with [Capacitor](https://capacitorjs.com).
@@ -45,7 +54,7 @@ The app is a web app (TypeScript, no framework) packaged as a native app with [C
 
 Native changes:
 
-- iOS (`ios/App/App`): landscape only, sound plays also with the silent switch on, and swipes from the screen edges go to the guitar first, so strumming near an edge does not open Control Center.
+- iOS (`ios/App/App`): landscape only, sound plays also with the silent switch on, and swipes from the screen edges go to the guitar first (see above). The home indicator stays visible, because iOS does not hold back swipes from the bottom edge while it hides itself.
 - Android (`android/app/src/main`): landscape only and full screen.
 
 ## Development

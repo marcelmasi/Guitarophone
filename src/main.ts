@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { SizeAdjuster } from './adjust';
 import { GuitarAudioEngine } from './audio/engine';
 import type { Tone } from './audio/tones';
@@ -188,6 +189,18 @@ bendingChoice.addEventListener('change', () => {
   settings.bending = bendingChoice.checked;
   input.bendingEnabled = settings.bending;
   saveSettings(settings);
+});
+
+// Help about swipes from the screen edges, opened from the settings panel. It explains Guided
+// Access, which is an iOS feature, so only the iOS app shows it.
+element('help-button').hidden = Capacitor.getPlatform() !== 'ios';
+element('help-button').addEventListener('click', () => {
+  element('settings').hidden = true;
+  element('help').hidden = false;
+});
+element('help-close').addEventListener('click', () => {
+  element('help').hidden = true;
+  element('settings').hidden = false;
 });
 
 // Licenses of the software included in the app, opened from the settings panel.

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_PROPORTIONS, Layout, MAXIMUM_FRET_COUNT, limitProportions } from '../src/layout';
+import {
+  DEFAULT_PROPORTIONS,
+  Layout,
+  MAXIMUM_FRET_COUNT,
+  OUTER_STRING_EDGE_DISTANCE,
+  limitProportions,
+} from '../src/layout';
 
 const noSafeArea = { top: 0, right: 0, bottom: 0, left: 0 };
 
@@ -47,12 +53,25 @@ describe('adjustable proportions', () => {
     const withoutBorder = new Layout(844, 390, noSafeArea, false);
     const withBorder = new Layout(844, 390, noSafeArea, false, { ...DEFAULT_PROPORTIONS, topBorderShare: 0.3 });
     expect(withBorder.neckTop).toBeCloseTo(390 * 0.3);
-    expect(withBorder.stringSpacing).toBeCloseTo(withoutBorder.stringSpacing * 0.7);
-    // The low E string moves down and the high E string moves closer to the bottom edge.
     expect(withBorder.stringPositions[0]).toBeGreaterThan(withBorder.neckTop);
-    expect(withBorder.stringPositions[5]).toBeGreaterThan(withoutBorder.stringPositions[5]);
+    expect(withBorder.stringSpacing).toBeLessThan(withoutBorder.stringSpacing);
+    expect(withBorder.stringPositions[5]).toBeCloseTo(withoutBorder.stringPositions[5]);
     expect(withBorder.isAboveNeck(390 * 0.2)).toBe(true);
     expect(withBorder.isAboveNeck(withBorder.stringPositions[0])).toBe(false);
+  });
+
+  it('keeps the outer strings away from the top and bottom screen edges', () => {
+    const notched = new Layout(874, 402, { top: 0, right: 62, bottom: 21, left: 62 }, false);
+    expect(notched.stringPositions[0]).toBeCloseTo(OUTER_STRING_EDGE_DISTANCE);
+    expect(notched.stringPositions[5]).toBeCloseTo(402 - OUTER_STRING_EDGE_DISTANCE);
+    expect(notched.stringPositions[1] - notched.stringPositions[0]).toBeCloseTo(notched.stringSpacing);
+    expect(notched.stringPositions[5] - notched.stringPositions[4]).toBeCloseTo(notched.stringSpacing);
+  });
+
+  it('keeps room for the strings on short screens', () => {
+    const short = new Layout(600, 200, noSafeArea, false);
+    expect(short.stringPositions[0]).toBeGreaterThan(0);
+    expect(short.stringSpacing).toBeGreaterThan(200 / 10);
   });
 
   it('starts the border at the safe area, not at the screen edge', () => {
